@@ -13,11 +13,15 @@ const Login = () => {
         e.preventDefault();
         api.login(username, password)
             .then(response => {
-                //console.log(response.data.role[0].authority)
-                localStorage.setItem('token', response.data.token);
+                const token = response.headers['authorization'];
+
+                // Store the token in localStorage or sessionStorage
+                localStorage.setItem('token', token);
+                localStorage.setItem('username', username);
+
                 login();
                 if(response.data.role[0].authority==='ADMIN'){
-                    navigate('/students'); // Redirect to the student list page after login
+                    navigate('/dashadmin'); // Redirect to the student list page after login
                 }else{
                     navigate('/dashstudents');
                 }

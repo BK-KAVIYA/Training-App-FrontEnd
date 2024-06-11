@@ -1,9 +1,9 @@
 // App.js
 import React from 'react';
-import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import { BrowserRouter as Router, Route, Routes  } from 'react-router-dom';
 import Register from './components/Register';
 import Login from './components/Login';
-import StudentList from './components/StudentList';
+import BlogList from './components/BlogList';
 import HomePage from './components/HomePage';
 import About from './components/About';
 import NavBar from './components/NavBar';
@@ -22,8 +22,10 @@ function App() {
                             <Route path="/register" element={<Register />} />
                             <Route path="/login" element={<Login />} />
                             <Route path="/about" element={<About />} />
-                            <Route path="/students" element={<StudentList />} />
                             <Route path="/dashstudents" element={<StudentProfile />} />
+                            <Route path="/dashadmin" element={<BlogList/>} />
+                                {/* <Route path="/create-blog-post" component={CreateBlogPost} />
+                                <Route path="/edit-blog-post/:id" component={EditBlogPost} /> */}
                         </Routes>
                     </div>
                 </div>
