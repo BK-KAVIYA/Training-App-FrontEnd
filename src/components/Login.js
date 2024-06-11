@@ -29,7 +29,7 @@ const Login = () => {
             })
             .catch(error => {
                 console.error(error);
-                alert('Login failed');
+                alert('password or username is incorrect');
             });
     };
 

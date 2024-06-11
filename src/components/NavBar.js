@@ -7,35 +7,40 @@ const NavBar = () => {
     const navigate = useNavigate();
 
     const handleLogout = () => {
+        localStorage.clear();
         logout();
         navigate('/');
     };
 
     return (
-        <nav className="w-full bg-white shadow p-4">
-            <ul className="flex justify-center space-x-4">
-                <li>
-                    <Link to="/" className="text-blue-500 hover:underline">Home</Link>
-                </li>
-                <li>
-                    <Link to="/about" className="text-blue-500 hover:underline">About</Link>
-                </li>
-                {!isAuthenticated ? (
-                    <>
-                        <li>
-                            <Link to="/register" className="text-blue-500 hover:underline">Register</Link>
-                        </li>
-                        <li>
-                            <Link to="/login" className="text-blue-500 hover:underline">Login</Link>
-                        </li>
-                    </>
-                ) : (
-                    <li>
-                        <button onClick={handleLogout} className="text-red-500 hover:underline">Logout</button>
-                    </li>
-                )}
-                
-            </ul>
+        <nav className="bg-blue-800 shadow-md">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div className="flex items-center justify-between h-16">
+                    <div className="flex items-center">
+                        <div className="flex-shrink-0">
+                            <Link to="/" className="text-white font-bold text-xl">My Blog</Link>
+                        </div>
+                        <div className="hidden md:block">
+                            <div className="ml-10 flex items-baseline space-x-4">
+                                <Link to="/" className="text-white hover:bg-blue-700 px-3 py-2 rounded-md text-sm font-medium">Home</Link>
+                                <Link to="/about" className="text-white hover:bg-blue-700 px-3 py-2 rounded-md text-sm font-medium">About</Link>
+                            </div>
+                        </div>
+                    </div>
+                    <div className="hidden md:block">
+                        <div className="ml-4 flex items-center md:ml-6">
+                            {!isAuthenticated ? (
+                                <>
+                                    <Link to="/register" className="text-white hover:bg-blue-700 px-3 py-2 rounded-md text-sm font-medium">Register</Link>
+                                    <Link to="/login" className="text-white hover:bg-blue-700 px-3 py-2 rounded-md text-sm font-medium">Login</Link>
+                                </>
+                            ) : (
+                                <button onClick={handleLogout} className="text-white hover:bg-blue-700 px-3 py-2 rounded-md text-sm font-medium">Logout</button>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            </div>
         </nav>
     );
 };

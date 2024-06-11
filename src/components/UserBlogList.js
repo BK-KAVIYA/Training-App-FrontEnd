@@ -4,15 +4,18 @@ import userApi from '../services/api';
 import CreatePostModal from './CreatePostModal';
 import EditPostModal from './EditPostModal';
 
-const BlogList = () => {
+const UserBlogList = () => {
     const [blogPosts, setBlogPosts] = useState([]);
     const [showCreateForm, setShowCreateForm] = useState(false);
     const [editPostData, setEditPostData] = useState(null);
     const [authors, setAuthors] = useState({});
-    const [currentUserId, setCurrentUserId] = useState(null);
+    const [currentUser, setCurrentUser] = useState(null);
+    
 
     useEffect(() => {
         const token = localStorage.getItem('token');
+        const username = localStorage.getItem('username');
+
         api.fetchBlogPosts(token)
             .then(blogPostsData => {
                 setBlogPosts(blogPostsData);
@@ -21,15 +24,36 @@ const BlogList = () => {
                 console.error(error.message);
             });
 
-        const username = localStorage.getItem('username');
-        userApi.getCurrentUser(username, token)
+        userApi.getCurrentUser(username,token)
             .then(userData => {
-                setCurrentUserId(userData.id);
+                setCurrentUser(userData); 
             })
             .catch(error => {
                 console.error('Failed to fetch current user:', error.message);
             });
     }, []);
+
+
+    const handleDelete = (id) => {
+        const token = localStorage.getItem('token');
+        api.deleteBlogPost(id, token)
+            .then(() => {
+                setBlogPosts(blogPosts.filter(post => post.id !== id));
+            })
+            .catch(error => {
+                console.error(error.message);
+            });
+    };
+
+    const handleEdit = (post) => {
+        setEditPostData(post);
+        setShowCreateForm(true);
+    };
+
+    const handleCloseModal = () => {
+        setShowCreateForm(false);
+        setEditPostData(null);
+    };
 
     useEffect(() => {
         const fetchAuthors = async () => {
@@ -53,30 +77,6 @@ const BlogList = () => {
         }
     }, [blogPosts]);
 
-    const handleDelete = (id) => {
-        const token = localStorage.getItem('token');
-        api.deleteBlogPost(id, token)
-            .then(() => {
-                setBlogPosts(blogPosts.filter(post => post.id !== id));
-            })
-            .catch(error => {
-                console.error(error.message);
-            });
-    };
-
-    const handleEdit = (post) => {
-        setEditPostData(post);
-        setShowCreateForm(true);
-    };
-
-    const handleCloseModal = () => {
-        setShowCreateForm(false);
-        setEditPostData(null);
-    };
-
-    if (currentUserId === null) {
-        return <div>Loading...</div>; // Show a loading state until currentUserId is set
-    }
 
     return (
         <div className="min-h-screen flex items-center justify-center bg-gray-100">
@@ -99,10 +99,11 @@ const BlogList = () => {
                 )}
                 <div className="flex flex-wrap justify-center">
                     {blogPosts.map(post => (
+                        post && (
                         <div key={post.id} className="max-w-sm rounded overflow-hidden shadow-lg m-4">
                             <div className="px-6 py-4">
                                 <div className="font-bold text-xl mb-2">{post.title}</div>
-                                <p className="text-gray-700 text-base">{post.content.substring(0, 100)}...</p>
+                                <p className="text-gray-700 text-base">{post.content.substring(0, 200)}...</p>
                             </div>
                             <div className="px-6 py-4">
                                 <span className="inline-block bg-gray-200 rounded-full px-3 py-1 text-sm font-semibold text-gray-700 mr-2">
@@ -111,26 +112,27 @@ const BlogList = () => {
                                 <span className="inline-block bg-gray-200 rounded-full px-3 py-1 text-sm font-semibold text-gray-700 mr-2">
                                     Category: {post.category}
                                 </span>
-                                <div className="inline-block">
-                                    {currentUserId === post.author && (
-                                        <>
-                                            <button
-                                                className="bg-red-500 text-white px-4 py-2 rounded mt-3"
-                                                onClick={() => handleDelete(post.id)}
-                                            >
-                                                Delete
-                                            </button>
-                                            <button
-                                                className="bg-yellow-500 text-white px-4 py-2 rounded ml-2 mt-3"
-                                                onClick={() => handleEdit(post)}
-                                            >
-                                                Edit
-                                            </button>
-                                        </>
-                                    )}
-                                </div>
+
+
+                                { String(currentUser.id) === post.author && (
+                                    <div className="inline-block">
+                                        <button
+                                            className="bg-red-500 text-white px-4 py-2 rounded mt-3"
+                                            onClick={() => handleDelete(post.id)}
+                                        >
+                                            Delete
+                                        </button>
+                                        <button
+                                            className="bg-yellow-500 text-white px-4 py-2 rounded ml-2 mt-3"
+                                            onClick={() => handleEdit(post)}
+                                        >
+                                            Edit
+                                        </button>
+                                    </div>
+                                )}
                             </div>
                         </div>
+                        )
                     ))}
                 </div>
             </div>
@@ -138,4 +140,4 @@ const BlogList = () => {
     );
 };
 
-export default BlogList;
+export default UserBlogList;
