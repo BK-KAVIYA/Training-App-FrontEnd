@@ -31,8 +31,21 @@ const getCurrentUser = async (username, token) => {
     }
 };
 
+const getById = async (id, token) => {
+    try {
+        const response = await axios.get(`${API_URL}auth/get-by/${id}`, {
+            headers: { Authorization: token }
+        });
+        return response.data; 
+    } catch (error) {
+        console.error('Error fetching current user:', error);
+        throw error; 
+    }
+};
+
 export default {
     register,
     login,
     getCurrentUser,
+    getById
 };

@@ -9,6 +9,7 @@ import About from './components/About';
 import NavBar from './components/NavBar';
 import { AuthProvider } from './context/AuthContext';
 import StudentProfile from './components/StudentProfile';
+import UserBlogList from './components/UserBlogList';
 
 function App() {
     return (
@@ -24,8 +25,7 @@ function App() {
                             <Route path="/about" element={<About />} />
                             <Route path="/dashstudents" element={<StudentProfile />} />
                             <Route path="/dashadmin" element={<BlogList/>} />
-                                {/* <Route path="/create-blog-post" component={CreateBlogPost} />
-                                <Route path="/edit-blog-post/:id" component={EditBlogPost} /> */}
+                            <Route path="/dashuser" element={<UserBlogList/>} />
                         </Routes>
                     </div>
                 </div>

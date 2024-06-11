@@ -23,7 +23,7 @@ const Login = () => {
                 if(response.data.role[0].authority==='ADMIN'){
                     navigate('/dashadmin'); // Redirect to the student list page after login
                 }else{
-                    navigate('/dashstudents');
+                    navigate('/dashuser');
                 }
                 
             })

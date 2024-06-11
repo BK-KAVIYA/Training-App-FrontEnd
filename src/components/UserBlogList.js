@@ -9,6 +9,7 @@ const BlogList = () => {
     const [showCreateForm, setShowCreateForm] = useState(false);
     const [editPostData, setEditPostData] = useState(null);
     const [authors, setAuthors] = useState({});
+    const [currentUserId, setCurrentUserId] = useState(null);
 
     useEffect(() => {
         const token = localStorage.getItem('token');
@@ -19,28 +20,16 @@ const BlogList = () => {
             .catch(error => {
                 console.error(error.message);
             });
-    }, []);
 
-    const handleDelete = (id) => {
-        const token = localStorage.getItem('token');
-        api.deleteBlogPost(id, token)
-            .then(() => {
-                setBlogPosts(blogPosts.filter(post => post.id !== id));
+        const username = localStorage.getItem('username');
+        userApi.getCurrentUser(username, token)
+            .then(userData => {
+                setCurrentUserId(userData.id);
             })
             .catch(error => {
-                console.error(error.message);
+                console.error('Failed to fetch current user:', error.message);
             });
-    };
-
-    const handleEdit = (post) => {
-        setEditPostData(post); 
-        setShowCreateForm(true);
-    };
-
-    const handleCloseModal = () => {
-        setShowCreateForm(false);
-        setEditPostData(null); 
-    };
+    }, []);
 
     useEffect(() => {
         const fetchAuthors = async () => {
@@ -63,6 +52,31 @@ const BlogList = () => {
             fetchAuthors();
         }
     }, [blogPosts]);
+
+    const handleDelete = (id) => {
+        const token = localStorage.getItem('token');
+        api.deleteBlogPost(id, token)
+            .then(() => {
+                setBlogPosts(blogPosts.filter(post => post.id !== id));
+            })
+            .catch(error => {
+                console.error(error.message);
+            });
+    };
+
+    const handleEdit = (post) => {
+        setEditPostData(post);
+        setShowCreateForm(true);
+    };
+
+    const handleCloseModal = () => {
+        setShowCreateForm(false);
+        setEditPostData(null);
+    };
+
+    if (currentUserId === null) {
+        return <div>Loading...</div>; // Show a loading state until currentUserId is set
+    }
 
     return (
         <div className="min-h-screen flex items-center justify-center bg-gray-100">
@@ -98,18 +112,22 @@ const BlogList = () => {
                                     Category: {post.category}
                                 </span>
                                 <div className="inline-block">
-                                    <button
-                                        className="bg-red-500 text-white px-4 py-2 rounded mt-3"
-                                        onClick={() => handleDelete(post.id)}
-                                    >
-                                        Delete
-                                    </button>
-                                    <button
-                                        className="bg-yellow-500 text-white px-4 py-2 rounded ml-2 mt-3"
-                                        onClick={() => handleEdit(post)}
-                                    >
-                                        Edit
-                                    </button>
+                                    {currentUserId === post.author && (
+                                        <>
+                                            <button
+                                                className="bg-red-500 text-white px-4 py-2 rounded mt-3"
+                                                onClick={() => handleDelete(post.id)}
+                                            >
+                                                Delete
+                                            </button>
+                                            <button
+                                                className="bg-yellow-500 text-white px-4 py-2 rounded ml-2 mt-3"
+                                                onClick={() => handleEdit(post)}
+                                            >
+                                                Edit
+                                            </button>
+                                        </>
+                                    )}
                                 </div>
                             </div>
                         </div>
