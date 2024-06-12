@@ -9,6 +9,13 @@ const fetchBlogPosts = async (token) => {
     return response.data;
 };
 
+const getBlogPostById = async (id, token) => {
+    const response = await axios.get(`${API_URL}/${id}`, {
+        headers: { Authorization: `${token}` }
+    });
+    return response.data;
+};
+
 const deleteBlogPost = async (id, token) => {
     await axios.delete(`${API_URL}/${id}`, {
         headers: { Authorization: `${token}` }
@@ -33,5 +40,6 @@ export default {
     fetchBlogPosts,
     deleteBlogPost,
     createBlogPost,
-    updateBlogPost
+    updateBlogPost,
+    getBlogPostById
 };

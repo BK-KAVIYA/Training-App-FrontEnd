@@ -8,8 +8,8 @@ import HomePage from './components/HomePage';
 import About from './components/About';
 import NavBar from './components/NavBar';
 import { AuthProvider } from './context/AuthContext';
-import StudentProfile from './components/StudentProfile';
 import UserBlogList from './components/UserBlogList';
+import SinglePostPage from './components/SinglePostPage';
 
 function App() {
     return (
@@ -23,9 +23,9 @@ function App() {
                             <Route path="/register" element={<Register />} />
                             <Route path="/login" element={<Login />} />
                             <Route path="/about" element={<About />} />
-                            <Route path="/dashstudents" element={<StudentProfile />} />
                             <Route path="/dashadmin" element={<BlogList/>} />
                             <Route path="/dashuser" element={<UserBlogList/>} />
+                            <Route path="/post/:postId" element={<SinglePostPage />} />
                         </Routes>
                     </div>
                 </div>

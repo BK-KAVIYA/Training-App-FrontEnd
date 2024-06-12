@@ -3,6 +3,7 @@ import api from '../services/blog-api';
 import userApi from '../services/api';
 import CreatePostModal from './CreatePostModal';
 import EditPostModal from './EditPostModal';
+import { useNavigate } from 'react-router-dom';
 
 const UserBlogList = () => {
     const [blogPosts, setBlogPosts] = useState([]);
@@ -10,7 +11,9 @@ const UserBlogList = () => {
     const [editPostData, setEditPostData] = useState(null);
     const [authors, setAuthors] = useState({});
     const [currentUser, setCurrentUser] = useState(null);
-    
+    const [currentPage, setCurrentPage] = useState(1);
+    const postsPerPage = 4;
+    const navigate = useNavigate();
 
     useEffect(() => {
         const token = localStorage.getItem('token');
@@ -24,15 +27,14 @@ const UserBlogList = () => {
                 console.error(error.message);
             });
 
-        userApi.getCurrentUser(username,token)
+        userApi.getCurrentUser(username, token)
             .then(userData => {
-                setCurrentUser(userData); 
+                setCurrentUser(userData);
             })
             .catch(error => {
                 console.error('Failed to fetch current user:', error.message);
             });
     }, []);
-
 
     const handleDelete = (id) => {
         const token = localStorage.getItem('token');
@@ -43,6 +45,10 @@ const UserBlogList = () => {
             .catch(error => {
                 console.error(error.message);
             });
+    };
+
+    const handleCardClick = (postId) => {
+        navigate(`/post/${postId}`);
     };
 
     const handleEdit = (post) => {
@@ -77,6 +83,26 @@ const UserBlogList = () => {
         }
     }, [blogPosts]);
 
+    if (!blogPosts || currentUser === null) {
+        return <div>Loading...</div>;
+    }
+
+    // Pagination logic
+    const totalPosts = blogPosts.length;
+    const totalPages = Math.ceil(totalPosts / postsPerPage);
+    const currentPosts = blogPosts.slice((currentPage - 1) * postsPerPage, currentPage * postsPerPage);
+
+    const handlePreviousPage = () => {
+        if (currentPage > 1) {
+            setCurrentPage(currentPage - 1);
+        }
+    };
+
+    const handleNextPage = () => {
+        if (currentPage < totalPages) {
+            setCurrentPage(currentPage + 1);
+        }
+    };
 
     return (
         <div className="min-h-screen flex items-center justify-center bg-gray-100">
@@ -98,9 +124,13 @@ const UserBlogList = () => {
                     )
                 )}
                 <div className="flex flex-wrap justify-center">
-                    {blogPosts.map(post => (
+                    {currentPosts.map(post => (
                         post && (
-                        <div key={post.id} className="max-w-sm rounded overflow-hidden shadow-lg m-4">
+                        <div 
+                            key={post.id} 
+                            className="max-w-sm rounded overflow-hidden shadow-lg m-4"
+                            onClick={() => handleCardClick(post.id)}
+                        >
                             <div className="px-6 py-4">
                                 <div className="font-bold text-xl mb-2">{post.title}</div>
                                 <p className="text-gray-700 text-base">{post.content.substring(0, 200)}...</p>
@@ -112,19 +142,23 @@ const UserBlogList = () => {
                                 <span className="inline-block bg-gray-200 rounded-full px-3 py-1 text-sm font-semibold text-gray-700 mr-2">
                                     Category: {post.category}
                                 </span>
-
-
-                                { String(currentUser.id) === post.author && (
+                                { currentUser && String(currentUser.id) === String(post.author) && (
                                     <div className="inline-block">
                                         <button
                                             className="bg-red-500 text-white px-4 py-2 rounded mt-3"
-                                            onClick={() => handleDelete(post.id)}
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                handleDelete(post.id);
+                                            }}
                                         >
                                             Delete
                                         </button>
                                         <button
                                             className="bg-yellow-500 text-white px-4 py-2 rounded ml-2 mt-3"
-                                            onClick={() => handleEdit(post)}
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                handleEdit(post);
+                                            }}
                                         >
                                             Edit
                                         </button>
@@ -134,6 +168,22 @@ const UserBlogList = () => {
                         </div>
                         )
                     ))}
+                </div>
+                <div className="flex justify-center mt-4">
+                    <button
+                        className="bg-gray-300 text-gray-700 px-4 py-2 rounded mr-2"
+                        onClick={handlePreviousPage}
+                        disabled={currentPage === 1}
+                    >
+                        Previous
+                    </button>
+                    <button
+                        className="bg-gray-300 text-gray-700 px-4 py-2 rounded"
+                        onClick={handleNextPage}
+                        disabled={currentPage === totalPages}
+                    >
+                        Next
+                    </button>
                 </div>
             </div>
         </div>

@@ -3,12 +3,16 @@ import api from '../services/blog-api';
 import userApi from '../services/api';
 import CreatePostModal from './CreatePostModal';
 import EditPostModal from './EditPostModal';
+import { useNavigate } from 'react-router-dom';
 
 const BlogList = () => {
     const [blogPosts, setBlogPosts] = useState([]);
     const [showCreateForm, setShowCreateForm] = useState(false);
     const [editPostData, setEditPostData] = useState(null);
     const [authors, setAuthors] = useState({});
+    const [currentPage, setCurrentPage] = useState(1);
+    const postsPerPage = 4;
+    const navigate = useNavigate();
 
     useEffect(() => {
         const token = localStorage.getItem('token');
@@ -42,6 +46,10 @@ const BlogList = () => {
         setEditPostData(null); 
     };
 
+    const handleCardClick = (postId) => {
+        navigate(`/post/${postId}`);
+    };
+
     useEffect(() => {
         const fetchAuthors = async () => {
             const token = localStorage.getItem('token');
@@ -64,6 +72,27 @@ const BlogList = () => {
         }
     }, [blogPosts]);
 
+    if (!blogPosts) {
+        return <div>Loading...</div>;
+    }
+
+    // Pagination logic
+    const totalPosts = blogPosts.length;
+    const totalPages = Math.ceil(totalPosts / postsPerPage);
+    const currentPosts = blogPosts.slice((currentPage - 1) * postsPerPage, currentPage * postsPerPage);
+
+    const handlePreviousPage = () => {
+        if (currentPage > 1) {
+            setCurrentPage(currentPage - 1);
+        }
+    };
+
+    const handleNextPage = () => {
+        if (currentPage < totalPages) {
+            setCurrentPage(currentPage + 1);
+        }
+    };
+
     return (
         <div className="min-h-screen flex items-center justify-center bg-gray-100">
             <div className="flex flex-col items-center">
@@ -84,8 +113,12 @@ const BlogList = () => {
                     )
                 )}
                 <div className="flex flex-wrap justify-center">
-                    {blogPosts.map(post => (
-                        <div key={post.id} className="max-w-sm rounded overflow-hidden shadow-lg m-4">
+                    {currentPosts.map(post => (
+                        <div 
+                            key={post.id} 
+                            className="max-w-sm rounded overflow-hidden shadow-lg m-4"
+                            onClick={() => handleCardClick(post.id)}
+                        >
                             <div className="px-6 py-4">
                                 <div className="font-bold text-xl mb-2">{post.title}</div>
                                 <p className="text-gray-700 text-base">{post.content.substring(0, 100)}...</p>
@@ -100,13 +133,19 @@ const BlogList = () => {
                                 <div className="inline-block">
                                     <button
                                         className="bg-red-500 text-white px-4 py-2 rounded mt-3"
-                                        onClick={() => handleDelete(post.id)}
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            handleDelete(post.id);
+                                        }}
                                     >
                                         Delete
                                     </button>
                                     <button
                                         className="bg-yellow-500 text-white px-4 py-2 rounded ml-2 mt-3"
-                                        onClick={() => handleEdit(post)}
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            handleEdit(post);
+                                        }}
                                     >
                                         Edit
                                     </button>
@@ -114,6 +153,22 @@ const BlogList = () => {
                             </div>
                         </div>
                     ))}
+                </div>
+                <div className="flex justify-center mt-4 mb-8">
+                    <button
+                        className="bg-gray-300 text-gray-700 px-4 py-2 rounded mr-2"
+                        onClick={handlePreviousPage}
+                        disabled={currentPage === 1}
+                    >
+                        Previous
+                    </button>
+                    <button
+                        className="bg-blue-800 text-white px-4 py-2 rounded"
+                        onClick={handleNextPage}
+                        disabled={currentPage === totalPages}
+                    >
+                        Next
+                    </button>
                 </div>
             </div>
         </div>
