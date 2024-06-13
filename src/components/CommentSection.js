@@ -66,7 +66,7 @@ const CommentSection = ({ postId, authorId }) => {
         try {
             const addedComment = await commentApi.addComment(newComment, token);
             setComments([...comments, addedComment]);
-            setContent(''); // Clear the textarea after successfully adding comment
+            setContent(''); 
         } catch (error) {
             console.error('Error adding comment:', error.message);
         }
