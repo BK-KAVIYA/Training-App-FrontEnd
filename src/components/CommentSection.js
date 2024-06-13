@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import commentApi from '../services/comment-api';
 
-const CommentSection = ({ postId, author }) => {
+const CommentSection = ({ postId, authorId }) => {
     const [comments, setComments] = useState([]);
+    const [contentc, setContent] = useState('');
 
     useEffect(() => {
         const token = localStorage.getItem('token');
@@ -48,17 +49,27 @@ const CommentSection = ({ postId, author }) => {
         }
     };
 
-    //Need To be Fixed
-    const handleAddComment = (content) => {
+    const handleAddComment = async (content) => {
+        if (!content) {
+            alert('Please add a comment.');
+            return;
+        }
+        
         const token = localStorage.getItem('token');
-        const username = localStorage.getItem('username');
-        commentApi.addComment(postId, content, username, token)
-            .then(newComment => {
-                setComments([...comments, newComment]);
-            })
-            .catch(error => {
-                console.error('Error adding comment:', error.message);
-            });
+
+        const newComment = {
+            content: content,
+            post_id: postId,
+            user_id: authorId,
+        };
+
+        try {
+            const addedComment = await commentApi.addComment(newComment, token);
+            setComments([...comments, addedComment]);
+            setContent(''); // Clear the textarea after successfully adding comment
+        } catch (error) {
+            console.error('Error adding comment:', error.message);
+        }
     };
 
     return (
@@ -92,10 +103,12 @@ const CommentSection = ({ postId, author }) => {
                     className="w-full border rounded-md p-2 mb-4"
                     rows="4"
                     placeholder="Add a new comment..."
+                    value={contentc} // Ensure controlled component
+                    onChange={(e) => setContent(e.target.value)}
                 />
                 <button
                     className="bg-blue-500 text-white px-4 py-2 rounded"
-                    onClick={handleAddComment}
+                    onClick={() => handleAddComment(contentc)}
                 >
                     Add Comment
                 </button>

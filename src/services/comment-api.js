@@ -31,9 +31,12 @@ export const getCommentsForPost = async (postId, token) => {
   }
 };
 
-export const addComment = async (commentData) => {
+export const addComment = async (commentData,token) => {
+
   try {
-    const response = await commentApi.post('/comments', commentData);
+    const response = await commentApi.post('/comments', commentData, {
+      headers: { Authorization: `${token}` },
+    });
     return response.data;
   } catch (error) {
     console.error('Error adding comment:', error);

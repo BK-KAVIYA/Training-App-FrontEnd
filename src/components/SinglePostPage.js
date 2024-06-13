@@ -11,6 +11,7 @@ const SinglePostPage = () => {
     const { postId } = useParams();
     const [post, setPost] = useState(null);
     const [author, setAuthor] = useState('');
+    const [authorId, setAuthorId] = useState('');
     const [showEditModal, setShowEditModal] = useState(false);
     const navigate = useNavigate();
 
@@ -22,6 +23,7 @@ const SinglePostPage = () => {
                 return postData.author;
             })
             .then(authorId => {
+                setAuthorId(authorId); 
                 return userApi.getById(authorId, token);
             })
             .then(authorData => {
@@ -57,7 +59,9 @@ const SinglePostPage = () => {
                 <p className="text-gray-700 mb-4">Author: {author}</p>
                 <div className="text-gray-700 mb-4">{post.content}</div>
                 <p className="text-gray-500">Category: {post.category}</p>
-                <CommentSection postId={postId} author={author} />
+                    
+                <CommentSection postId={postId} authorId={authorId} />
+
                 {String(author) === localStorage.getItem('username') ||
                     localStorage.getItem('username') === 'admin' && (
                         <div className="mt-4">
