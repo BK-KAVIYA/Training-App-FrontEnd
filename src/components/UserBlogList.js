@@ -7,6 +7,7 @@ import { useNavigate } from 'react-router-dom';
 
 const UserBlogList = () => {
     const [blogPosts, setBlogPosts] = useState([]);
+    const [images, setImages] = useState({});
     const [showCreateForm, setShowCreateForm] = useState(false);
     const [editPostData, setEditPostData] = useState(null);
     const [authors, setAuthors] = useState({});
@@ -19,6 +20,7 @@ const UserBlogList = () => {
         const token = localStorage.getItem('token');
         const username = localStorage.getItem('username');
 
+        // Fetch blog posts
         api.fetchBlogPosts(token)
             .then(blogPostsData => {
                 setBlogPosts(blogPostsData);
@@ -27,6 +29,7 @@ const UserBlogList = () => {
                 console.error(error.message);
             });
 
+        // Fetch current user
         userApi.getCurrentUser(username, token)
             .then(userData => {
                 setCurrentUser(userData);
@@ -36,31 +39,7 @@ const UserBlogList = () => {
             });
     }, []);
 
-    const handleDelete = (id) => {
-        const token = localStorage.getItem('token');
-        api.deleteBlogPost(id, token)
-            .then(() => {
-                setBlogPosts(blogPosts.filter(post => post.id !== id));
-            })
-            .catch(error => {
-                console.error(error.message);
-            });
-    };
-
-    const handleCardClick = (postId) => {
-        navigate(`/post/${postId}`);
-    };
-
-    const handleEdit = (post) => {
-        setEditPostData(post);
-        setShowCreateForm(true);
-    };
-
-    const handleCloseModal = () => {
-        setShowCreateForm(false);
-        setEditPostData(null);
-    };
-
+    // Fetch authors of blog posts
     useEffect(() => {
         const fetchAuthors = async () => {
             const token = localStorage.getItem('token');
@@ -83,27 +62,64 @@ const UserBlogList = () => {
         }
     }, [blogPosts]);
 
-    if (!blogPosts || currentUser === null) {
-        return <div>Loading...</div>;
-    }
+    // Fetch images associated with blog posts
+    useEffect(() => {
+        const fetchImages = async () => {
+            const token = localStorage.getItem('token');
+            const imageMap = {};
+            const fetchImagePromises = blogPosts.map(post =>
+                api.fetchImagesByPostId(post.id, token)
+                    .then(imageData => {
+                        imageMap[post.id] = imageData;
+                    })
+                    .catch(error => {
+                        console.error(`Failed to fetch images for post ${post.id}:`, error.message);
+                    })
+            );
+            await Promise.all(fetchImagePromises);
+            setImages(imageMap);
+        };
+
+        if (blogPosts.length > 0) {
+            fetchImages();
+        }
+    }, [blogPosts]);
+
+    // Handle delete post
+    const handleDelete = (id) => {
+        const token = localStorage.getItem('token');
+        api.deleteBlogPost(id, token)
+            .then(() => {
+                setBlogPosts(blogPosts.filter(post => post.id !== id));
+            })
+            .catch(error => {
+                console.error(error.message);
+            });
+    };
+
+    // Handle card click to view post details
+    const handleCardClick = (postId) => {
+        navigate(`/post/${postId}`);
+    };
+
+    // Handle edit post
+    const handleEdit = (post) => {
+        setEditPostData(post);
+        setShowCreateForm(true);
+    };
+
+    // Close create/edit post modal
+    const handleCloseModal = () => {
+        setShowCreateForm(false);
+        setEditPostData(null);
+    };
 
     // Pagination logic
     const totalPosts = blogPosts.length;
     const totalPages = Math.ceil(totalPosts / postsPerPage);
     const currentPosts = blogPosts.slice((currentPage - 1) * postsPerPage, currentPage * postsPerPage);
 
-    const handlePreviousPage = () => {
-        if (currentPage > 1) {
-            setCurrentPage(currentPage - 1);
-        }
-    };
-
-    const handleNextPage = () => {
-        if (currentPage < totalPages) {
-            setCurrentPage(currentPage + 1);
-        }
-    };
-
+    // Render component
     return (
         <div className="min-h-screen flex items-center justify-center bg-gray-100">
             <div className="flex flex-col items-center">
@@ -125,14 +141,27 @@ const UserBlogList = () => {
                 )}
                 <div className="flex flex-wrap justify-center">
                     {currentPosts.map(post => (
-                        post && (
-                        <div 
-                            key={post.id} 
-                            className="max-w-sm rounded overflow-hidden shadow-lg m-4"
+                        <div
+                            key={post.id}
+                            className="max-w-sm rounded overflow-hidden shadow-lg m-4 cursor-pointer"
                             onClick={() => handleCardClick(post.id)}
                         >
                             <div className="px-6 py-4">
                                 <div className="font-bold text-xl mb-2">{post.title}</div>
+                                {/* Render images associated with the post */}
+                                <div className="px-6 py-4">
+                                    
+                                    {images[post.id] && images[post.id].map(image => (
+                                        
+                                        <img
+                                            key={image.id}
+                                            src={`/uploads/`+image.name}
+                                            alt={image.name}
+                                            className="mb-4"
+                                            style={{ maxWidth: '100%', maxHeight: '300px' }}
+                                        />
+                                    ))}
+                                </div>
                                 <p className="text-gray-700 text-base">{post.content.substring(0, 200)}...</p>
                             </div>
                             <div className="px-6 py-4">
@@ -165,21 +194,21 @@ const UserBlogList = () => {
                                     </div>
                                 )}
                             </div>
+                            
                         </div>
-                        )
                     ))}
                 </div>
                 <div className="flex justify-center mt-4">
                     <button
                         className="bg-gray-300 text-gray-700 px-4 py-2 rounded mr-2"
-                        onClick={handlePreviousPage}
+                        onClick={() => setCurrentPage(currentPage - 1)}
                         disabled={currentPage === 1}
                     >
                         Previous
                     </button>
                     <button
                         className="bg-gray-300 text-gray-700 px-4 py-2 rounded"
-                        onClick={handleNextPage}
+                        onClick={() => setCurrentPage(currentPage + 1)}
                         disabled={currentPage === totalPages}
                     >
                         Next

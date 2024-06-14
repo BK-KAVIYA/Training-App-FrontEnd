@@ -1,6 +1,7 @@
 import axios from 'axios';
 
 const API_URL = 'http://localhost:8080/api/blog-posts'; 
+const API_URL_IMAGE = 'http://localhost:8080';
 
 const fetchBlogPosts = async (token) => {
     const response = await axios.get(API_URL, {
@@ -36,10 +37,22 @@ const updateBlogPost = async (id, blogPost, token) => {
     return response.data;
 };
 
+export const fetchImagesByPostId = async (postId, token) => {
+    try {
+      const response = await axios.get(`${API_URL_IMAGE}/api/images/bypost/${postId}`, {
+        headers: { Authorization: `${token}` },
+      });
+      return response.data; 
+    } catch (error) {
+      throw new Error(`Failed to fetch images for post ${postId}: ${error.message}`);
+    }
+    };
+
 export default {
     fetchBlogPosts,
     deleteBlogPost,
     createBlogPost,
     updateBlogPost,
-    getBlogPostById
+    getBlogPostById,
+    fetchImagesByPostId
 };

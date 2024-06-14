@@ -44,9 +44,11 @@ export const addComment = async (commentData,token) => {
   }
 };
 
-export const deleteComment = async (commentId) => {
+export const deleteComment = async (commentId,token) => {
   try {
-    await commentApi.delete(`/comments/${commentId}`);
+    await commentApi.delete(`/comments/${commentId}`, {
+      headers: { Authorization: `${token}` },
+    });
   } catch (error) {
     console.error('Error deleting comment:', error);
     throw error;
