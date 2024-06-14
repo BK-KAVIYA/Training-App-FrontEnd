@@ -75,7 +75,7 @@ const SinglePostPage = () => {
                     {images.map(image => (
                         <img
                             key={image.id}
-                            src={`/uploads/`+image.name} 
+                            src={image.name} 
                             alt={image.name}
                             className="mb-4"
                             style={{ maxWidth: '100%', maxHeight: '300px' }}

@@ -48,11 +48,32 @@ export const fetchImagesByPostId = async (postId, token) => {
     }
     };
 
+
+    export const uploadImage = async (formData, token) => {
+        await axios.post(`${API_URL_IMAGE}/api/images/fileSystem`, formData, {
+            headers: {
+                Authorization: `${token}`,
+                'Content-Type': 'multipart/form-data'
+            }
+        });
+    }
+
+    export const updateImage = async (formData, token) => {
+        await axios.put(`${API_URL_IMAGE}/api/images/fileSystem`, formData, {
+            headers: {
+                Authorization: `${token}`,
+                'Content-Type': 'multipart/form-data'
+            }
+        });
+    }
+
 export default {
     fetchBlogPosts,
     deleteBlogPost,
     createBlogPost,
     updateBlogPost,
     getBlogPostById,
-    fetchImagesByPostId
+    uploadImage,
+    fetchImagesByPostId,
+    updateImage
 };

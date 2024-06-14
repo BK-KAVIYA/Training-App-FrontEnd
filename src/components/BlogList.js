@@ -6,6 +6,7 @@ import EditPostModal from './EditPostModal';
 import { useNavigate } from 'react-router-dom';
 
 const BlogList = () => {
+    const [images, setImages] = useState({});
     const [blogPosts, setBlogPosts] = useState([]);
     const [showCreateForm, setShowCreateForm] = useState(false);
     const [editPostData, setEditPostData] = useState(null);
@@ -72,6 +73,29 @@ const BlogList = () => {
         }
     }, [blogPosts]);
 
+     // Fetch images associated with blog posts
+    useEffect(() => {
+        const fetchImages = async () => {
+            const token = localStorage.getItem('token');
+            const imageMap = {};
+            const fetchImagePromises = blogPosts.map(post =>
+                api.fetchImagesByPostId(post.id, token)
+                    .then(imageData => {
+                        imageMap[post.id] = imageData;
+                    })
+                    .catch(error => {
+                        console.error(`Failed to fetch images for post ${post.id}:`, error.message);
+                    })
+            );
+            await Promise.all(fetchImagePromises);
+            setImages(imageMap);
+        };
+
+        if (blogPosts.length > 0) {
+            fetchImages();
+        }
+    }, [blogPosts]);
+
     if (!blogPosts) {
         return <div>Loading...</div>;
     }
@@ -121,6 +145,20 @@ const BlogList = () => {
                         >
                             <div className="px-6 py-4">
                                 <div className="font-bold text-xl mb-2">{post.title}</div>
+                                {/* Render images associated with the post */}
+                                <div className="px-6 py-4">
+                                    
+                                    {images[post.id] && images[post.id].map(image => (
+                                        
+                                        <img
+                                            key={image.id}
+                                            src={image.name}
+                                            alt={image.name}
+                                            className="mb-4"
+                                            style={{ maxWidth: '100%', maxHeight: '300px' }}
+                                        />
+                                    ))}
+                                </div>
                                 <p className="text-gray-700 text-base">{post.content.substring(0, 100)}...</p>
                             </div>
                             <div className="px-6 py-4">
