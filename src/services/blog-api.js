@@ -23,6 +23,19 @@ const deleteBlogPost = async (id, token) => {
     });
 };
 
+const deleteImagesByPostId = async (postId, token) => {
+    try {
+        const response = await axios.delete(`${API_URL_IMAGE}/api/images/bypost/${postId}`, {
+            headers: {
+                Authorization:  token,
+            },
+        });
+        return response.data;
+    } catch (error) {
+        throw new Error(`Error deleting images for post ID ${postId}: ${error.response.data}`);
+    }
+};
+
 const createBlogPost = async (blogPost, token) => {
     const response = await axios.post(API_URL, blogPost, {
         headers: { Authorization: `${token}` }
@@ -70,6 +83,7 @@ export const fetchImagesByPostId = async (postId, token) => {
 export default {
     fetchBlogPosts,
     deleteBlogPost,
+    deleteImagesByPostId,
     createBlogPost,
     updateBlogPost,
     getBlogPostById,

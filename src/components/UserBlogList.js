@@ -90,6 +90,8 @@ const UserBlogList = () => {
         const token = localStorage.getItem('token');
         api.deleteBlogPost(id, token)
             .then(() => {
+                // Delete images associated with the post
+                api.deleteImagesByPostId(id, token);
                 setBlogPosts(blogPosts.filter(post => post.id !== id));
             })
             .catch(error => {
