@@ -55,6 +55,19 @@ const SinglePostPage = () => {
         navigate(-1);
     };
 
+    // Handle delete post
+    const handleDelete = (id) => {
+        const token = localStorage.getItem('token');
+        api.deleteBlogPost(id, token)
+            .then(() => {
+                api.deleteImagesByPostId(id, token);
+                navigate('/');
+            })
+            .catch(error => {
+                console.error(error.message);
+            });
+    };
+
     if (!post) {
         return <div>Loading...</div>;
     }
@@ -95,7 +108,7 @@ const SinglePostPage = () => {
                             </button>
                             <button
                                 className="bg-red-500 text-white px-4 py-2 rounded"
-                                onClick={() => {}}
+                                onClick={() => handleDelete(post.id)}
                             >
                                 Delete
                             </button>
